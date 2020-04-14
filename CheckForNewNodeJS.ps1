@@ -1,8 +1,47 @@
-﻿
-# Install the job like this:
-# PS C:\> . .\CheckFOrNewNodeJS.ps1
-# PS C:\> InstallJob
+﻿Param(
+    [switch]$InstallTask
+)
 
+function ShowBalloonTip($tipText, $tipTitle, $clickURL, $tipDuration = 5000) {
+    Add-Type -AssemblyName  System.Windows.Forms
+    if ($global:balloon) {
+        DisposeBalloonTip
+    }
+    $global:balloon = New-Object System.Windows.Forms.NotifyIcon 
+    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClicked  -SourceIdentifier TipClicked  -Action {
+        Start-Process -FilePath "$clickURL"
+        DisposeBalloonTip
+    }) 
+    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClosed  -SourceIdentifier TipClosed  -Action {
+        DisposeBalloonTip
+    }) 
+    $path = (Get-Process -id $pid).Path
+    $balloon.Icon  = [System.Drawing.Icon]::ExtractAssociatedIcon($path) 
+    $balloon.BalloonTipIcon  = [System.Windows.Forms.ToolTipIcon]::Info
+    $balloon.BalloonTipText  = $tipText
+    $balloon.BalloonTipTitle  = $tipTitle
+    $balloon.Visible  = $true 
+    $balloon.ShowBalloonTip($tipDuration)
+}
+
+function DisposeBalloonTip() {
+    $global:balloon.dispose()
+    Unregister-Event  -SourceIdentifier TipClicked
+    Unregister-Event  -SourceIdentifier TipClosed
+    Remove-Job -Name TipClicked
+    Remove-Job -Name TipClosed
+    Remove-Variable  -Name balloon -Scope Global
+}
+
+function InstallScheduledJob() {
+   $T = New-JobTrigger -Weekly -At "10:00 PM" -DaysOfWeek Monday -WeeksInterval 1
+   Register-ScheduledJob -Name "CheckForNewNodeJSVersion" -FilePath $PSCommandPath -Trigger $T | Write-Host
+}
+
+if ($InstallTask) {
+    InstallScheduledJob
+    exit
+}
 
 $matchInfo = (& node -v) | Select-String -Pattern ".*((v\d+)\.\d+\.\d+).*"
 if ($matchInfo.Matches.Success) {
@@ -37,40 +76,5 @@ if ($response.StatusCode -eq 200) {
     }
 }
 
-function ShowBalloonTip($tipText, $tipTitle, $clickURL, $tipDuration = 5000) {
-    Add-Type -AssemblyName  System.Windows.Forms 
-    if ($global:balloon) {
-        DisposeBalloonTip
-    }
-    $global:balloon = New-Object System.Windows.Forms.NotifyIcon 
-    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClicked  -SourceIdentifier TipClicked  -Action {
-        Start-Process -FilePath "$clickURL" 
-        DisposeBalloonTip
-    }) 
-    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClosed  -SourceIdentifier TipClosed  -Action {
-        DisposeBalloonTip
-    }) 
-    $path = (Get-Process -id $pid).Path
-    $balloon.Icon  = [System.Drawing.Icon]::ExtractAssociatedIcon($path) 
-    $balloon.BalloonTipIcon  = [System.Windows.Forms.ToolTipIcon]::Info
-    $balloon.BalloonTipText  = $tipText
-    $balloon.BalloonTipTitle  = $tipTitle
-    $balloon.Visible  = $true 
-    $balloon.ShowBalloonTip($tipDuration)
-}
-
-function DisposeBalloonTip() {
-    $global:balloon.dispose()
-    Unregister-Event  -SourceIdentifier TipClicked
-    Unregister-Event  -SourceIdentifier TipClosed
-    Remove-Job -Name TipClicked
-    Remove-Job -Name TipClosed
-    Remove-Variable  -Name balloon -Scope Global
-}
-
-function InstallJob() {
-   $T = New-JobTrigger -Weekly -At "10:00 PM" -DaysOfWeek Monday -WeeksInterval 1
-   Register-ScheduledJob -Name "CheckForNewNodeJSVersion" -FilePath $PSCommandPath -Trigger $T
-}
 
 
