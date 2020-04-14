@@ -69,7 +69,7 @@ if ($response.StatusCode -eq 200) {
         
         Write-Host "Latest version: $newVersion"
 
-        if ($newVersion -and ($newVersion -eq $version)) {
+        if ($newVersion -and ($newVersion -ne $version)) {
             ShowBalloonTip -tipText "Installed: $version, Remote: $newVersion" -tipTitle "New NodeJS version available" -clickURL "$nodeJSURL"
         }
     }
