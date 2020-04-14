@@ -12,3 +12,8 @@ To invoke the script periodically in the background you can call it with the swi
 ```
 .\CheckForNewNodeJS.ps1 -InstallTask
 ```
+
+## How to remove the scheduled task
+```
+.\CheckForNewNodeJS.ps1 -DeleteTask
+```

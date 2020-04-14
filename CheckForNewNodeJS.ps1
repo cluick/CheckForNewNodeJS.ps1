@@ -1,5 +1,6 @@
 ﻿Param(
-    [switch]$InstallTask
+    [switch]$InstallTask,
+	[switch]$DeleteTask
 )
 
 function ShowBalloonTip($tipText, $tipTitle, $clickURL, $tipDuration = 5000) {
@@ -35,12 +36,21 @@ function DisposeBalloonTip() {
 
 function InstallScheduledJob() {
    $T = New-JobTrigger -Weekly -At "10:00 PM" -DaysOfWeek Monday -WeeksInterval 1
-   Register-ScheduledJob -Name "CheckForNewNodeJSVersion" -FilePath $PSCommandPath -Trigger $T | Write-Host
+   Register-ScheduledJob -Name "CheckForNewNodeJSVersion" -FilePath $PSCommandPath -Trigger $T
+}
+
+function DeleteScheduledJob() {
+   Unregister-ScheduledJob -Name "CheckForNewNodeJSVersion"
 }
 
 if ($InstallTask) {
     InstallScheduledJob
     exit
+}
+
+if ($DeleteTask) {
+	DeleteScheduledJob
+	exit
 }
 
 $matchInfo = (& node -v) | Select-String -Pattern ".*((v\d+)\.\d+\.\d+).*"
