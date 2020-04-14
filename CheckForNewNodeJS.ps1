@@ -57,7 +57,6 @@ $nodeJSURL = "https://nodejs.org/dist/latest-$nodeMajorVersion.x/"
 Write-Host "Retrieving file list from $nodeJSURL"
 $response = Invoke-WebRequest -Uri $nodeJSURL
 if ($response.StatusCode -eq 200) {
-    $found = $false
     $newVersion = ""
     if ($version) {
         foreach ($link in $response.Links) {
