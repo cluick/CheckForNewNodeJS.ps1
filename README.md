@@ -4,9 +4,7 @@
 
 This Powershell script tests the installed Node.js version and checks if there is a newer Windows installation package available.
 
-The script will raise a "balloon" notification window if it detects a newer version.
-
-If the user clicks on the notification window, the script will open the Node.js download site in the default browser.
+The script will raise a "balloon" notification window if it detects a newer version. If the user clicks on the notification window, the script will open the Node.js download site in the default browser. 
 
 ## How to install the scheduled task
 
