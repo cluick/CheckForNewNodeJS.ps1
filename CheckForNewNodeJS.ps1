@@ -9,8 +9,8 @@ function ShowBalloonTip($tipText, $tipTitle, $clickURL, $tipDuration = 5000) {
         DisposeBalloonTip
     }
     $global:balloon = New-Object System.Windows.Forms.NotifyIcon 
-    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClicked  -SourceIdentifier TipClicked  -Action {
-        Start-Process -FilePath "$clickURL"
+    [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClicked  -SourceIdentifier TipClicked -MessageData "$clickURL" -Action {
+        Start-Process -FilePath $Event.MessageData
         DisposeBalloonTip
     }) 
     [void](Register-ObjectEvent  -InputObject $balloon  -EventName BalloonTipClosed  -SourceIdentifier TipClosed  -Action {
